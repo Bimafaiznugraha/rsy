@@ -1,0 +1,2979 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>RSY & Khai — Kenangan & Ajakan Main</title>
+  <meta name="description" content="Website kenangan indah RSY dan Khai — Galeri foto, mini games, dan ajakan main.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Outfit:wght@300;400;500;600;700&display=swap"
+    rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+
+  <!-- Firebase SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-storage-compat.js"></script>
+
+  <style>
+    /* ═══════════════════════════════════════════════════════
+       RESET & BASE
+       ═══════════════════════════════════════════════════════ */
+    *,
+    *::before,
+    *::after {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --pink: #FF8DA1;
+      --pink-light: #FFB3C1;
+      --pink-lighter: #FFD6DE;
+      --pink-pale: #FFF0F3;
+      --pink-deep: #E8637A;
+      --pink-dark: #D14D66;
+      --white: #FFFFFF;
+      --white-warm: #FFF8F9;
+      --text-dark: #4A2C3D;
+      --text-medium: #7A5568;
+      --text-light: #A87D92;
+      --shadow-pink: rgba(255, 141, 161, 0.3);
+      --shadow-soft: rgba(74, 44, 61, 0.08);
+      --radius: 16px;
+      --radius-lg: 24px;
+      --transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    html {
+      scroll-behavior: smooth;
+      overflow: hidden;
+      height: 100%;
+    }
+
+    body {
+      font-family: 'Outfit', sans-serif;
+      background: var(--white-warm);
+      color: var(--text-dark);
+      overflow: hidden;
+      height: 100%;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    h1,
+    h2,
+    h3,
+    h4 {
+      font-family: 'Playfair Display', serif;
+    }
+
+    /* ═══════════════════════════════════════════════════════
+       MUSIC BUTTON
+       ═══════════════════════════════════════════════════════ */
+    #music-btn {
+      position: fixed;
+      top: 16px;
+      right: 16px;
+      z-index: 9999;
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      border: 2px solid var(--pink-light);
+      background: rgba(255, 255, 255, 0.85);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      color: var(--pink);
+      font-size: 16px;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 15px var(--shadow-pink);
+    }
+
+    #music-btn:hover {
+      transform: scale(1.1);
+      background: var(--pink);
+      color: var(--white);
+    }
+
+    #music-btn.playing {
+      animation: pulse-music 2s infinite;
+    }
+
+    @keyframes pulse-music {
+
+      0%,
+      100% {
+        box-shadow: 0 4px 15px var(--shadow-pink);
+      }
+
+      50% {
+        box-shadow: 0 4px 25px rgba(255, 141, 161, 0.6);
+      }
+    }
+
+    /* ═══════════════════════════════════════════════════════
+       PEONY FLOWER (CSS Art)
+       ═══════════════════════════════════════════════════════ */
+    .peony-container {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      z-index: 0;
+      pointer-events: none;
+      width: 320px;
+      height: 320px;
+      opacity: 0.15;
+      transition: all 1.2s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .peony {
+      position: relative;
+      width: 100%;
+      height: 100%;
+    }
+
+    .petal {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+      transform-origin: center bottom;
+      transition: all 1.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    /* Core (center) */
+    .petal-core {
+      width: 40px;
+      height: 50px;
+      background: radial-gradient(ellipse, #FFD6DE 30%, var(--pink-light));
+      margin-left: -20px;
+      margin-top: -45px;
+      z-index: 10;
+    }
+
+    /* Inner petals — ring 1 */
+    .petal-inner {
+      width: 45px;
+      height: 60px;
+      background: linear-gradient(160deg, var(--pink-lighter) 0%, var(--pink-light) 100%);
+      margin-left: -22px;
+      margin-top: -50px;
+      z-index: 8;
+      opacity: 0.95;
+    }
+
+    /* Middle petals — ring 2 */
+    .petal-mid {
+      width: 55px;
+      height: 75px;
+      background: linear-gradient(160deg, var(--pink-light) 0%, var(--pink) 100%);
+      margin-left: -27px;
+      margin-top: -60px;
+      z-index: 6;
+      opacity: 0.9;
+    }
+
+    /* Outer petals — ring 3 */
+    .petal-outer {
+      width: 65px;
+      height: 90px;
+      background: linear-gradient(160deg, var(--pink) 0%, var(--pink-deep) 100%);
+      margin-left: -32px;
+      margin-top: -70px;
+      z-index: 4;
+      opacity: 0.85;
+    }
+
+    /* ── Bud state (default) ── */
+    .peony.bud .petal-inner {
+      transform: rotate(var(--r)) scale(0.6) translateY(5px);
+    }
+
+    .peony.bud .petal-mid {
+      transform: rotate(var(--r)) scale(0.4) translateY(10px);
+      opacity: 0.3;
+    }
+
+    .peony.bud .petal-outer {
+      transform: rotate(var(--r)) scale(0.2) translateY(15px);
+      opacity: 0;
+    }
+
+    /* ── Half-bloom ── */
+    .peony.half .petal-inner {
+      transform: rotate(var(--r)) scale(0.85) translateY(-5px);
+    }
+
+    .peony.half .petal-mid {
+      transform: rotate(var(--r)) scale(0.65) translateY(0px);
+      opacity: 0.7;
+    }
+
+    .peony.half .petal-outer {
+      transform: rotate(var(--r)) scale(0.4) translateY(5px);
+      opacity: 0.3;
+    }
+
+    /* ── Full bloom ── */
+    .peony.full .petal-inner {
+      transform: rotate(var(--r)) scale(1) translateY(-12px);
+    }
+
+    .peony.full .petal-mid {
+      transform: rotate(var(--r)) scale(1) translateY(-18px);
+      opacity: 0.9;
+    }
+
+    .peony.full .petal-outer {
+      transform: rotate(var(--r)) scale(1) translateY(-25px);
+      opacity: 0.85;
+    }
+
+    .peony.full+.peony-glow {
+      opacity: 1;
+    }
+
+    .peony-glow {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 200px;
+      height: 200px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(255, 141, 161, 0.25) 0%, transparent 70%);
+      opacity: 0;
+      transition: opacity 1.5s ease;
+      pointer-events: none;
+    }
+
+    /* ═══════════════════════════════════════════════════════
+       PAGES CONTAINER & TRANSITIONS
+       ═══════════════════════════════════════════════════════ */
+    .app-container {
+      position: relative;
+      width: 100%;
+      height: 100vh;
+      height: 100dvh;
+      overflow: hidden;
+      background: linear-gradient(180deg, var(--white-warm) 0%, var(--pink-pale) 60%, var(--pink-lighter) 100%);
+    }
+
+    .page {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      overflow-y: auto;
+      overflow-x: hidden;
+      opacity: 0;
+      transform: translateX(100%);
+      transition: opacity 0.6s ease, transform 0.7s cubic-bezier(0.4, 0, 0.2, 1);
+      pointer-events: none;
+      z-index: 1;
+      display: flex;
+      flex-direction: column;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    .page.active {
+      opacity: 1;
+      transform: translateX(0);
+      pointer-events: auto;
+      z-index: 5;
+    }
+
+    .page.exit-left {
+      opacity: 0;
+      transform: translateX(-100%);
+    }
+
+    .page.exit-right {
+      opacity: 0;
+      transform: translateX(100%);
+    }
+
+    .page.enter-left {
+      transform: translateX(-100%);
+    }
+
+    .page.enter-right {
+      transform: translateX(100%);
+    }
+
+    /* ═══════════════════════════════════════════════════════
+       PAGE 1 — MAIN / HOME
+       ═══════════════════════════════════════════════════════ */
+    #page1 {
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 24px;
+    }
+
+    .home-content {
+      position: relative;
+      z-index: 2;
+      max-width: 420px;
+      width: 100%;
+    }
+
+    .home-title-wrapper {
+      margin-bottom: 32px;
+    }
+
+    .home-subtitle {
+      font-family: 'Outfit', sans-serif;
+      font-weight: 300;
+      font-size: 14px;
+      letter-spacing: 4px;
+      text-transform: uppercase;
+      color: var(--text-light);
+      margin-bottom: 12px;
+      animation: fadeDown 1s ease 0.2s both;
+    }
+
+    .home-title {
+      font-size: 2.4rem;
+      font-weight: 700;
+      color: var(--text-dark);
+      line-height: 1.2;
+      animation: fadeDown 1s ease 0.4s both;
+    }
+
+    .home-title span {
+      color: var(--pink);
+      font-style: italic;
+    }
+
+    .home-divider {
+      width: 60px;
+      height: 3px;
+      background: linear-gradient(90deg, transparent, var(--pink), transparent);
+      margin: 20px auto;
+      border-radius: 2px;
+      animation: fadeDown 1s ease 0.5s both;
+    }
+
+    .home-tagline {
+      font-size: 15px;
+      color: var(--text-medium);
+      line-height: 1.6;
+      margin-bottom: 48px;
+      animation: fadeDown 1s ease 0.6s both;
+    }
+
+    .home-buttons {
+      display: flex;
+      gap: 16px;
+      animation: fadeUp 1s ease 0.8s both;
+    }
+
+    .home-btn {
+      flex: 1;
+      padding: 20px 16px;
+      border: none;
+      border-radius: var(--radius);
+      cursor: pointer;
+      font-family: 'Outfit', sans-serif;
+      font-weight: 600;
+      font-size: 14px;
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .home-btn::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+      transition: left 0.5s ease;
+    }
+
+    .home-btn:hover::before {
+      left: 100%;
+    }
+
+    .home-btn-left {
+      background: linear-gradient(135deg, var(--pink) 0%, var(--pink-deep) 100%);
+      color: var(--white);
+      box-shadow: 0 8px 25px var(--shadow-pink);
+    }
+
+    .home-btn-left:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 12px 35px rgba(255, 141, 161, 0.5);
+    }
+
+    .home-btn-right {
+      background: var(--white);
+      color: var(--pink-deep);
+      border: 2px solid var(--pink-light);
+      box-shadow: 0 4px 15px var(--shadow-soft);
+    }
+
+    .home-btn-right:hover {
+      transform: translateY(-3px);
+      background: var(--pink-pale);
+      box-shadow: 0 8px 25px var(--shadow-pink);
+    }
+
+    .home-btn i {
+      display: block;
+      font-size: 24px;
+      margin-bottom: 10px;
+    }
+
+    /* Floating petals background (Global) */
+    .floating-petals {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .f-petal {
+      position: absolute;
+      width: 12px;
+      height: 16px;
+      background: var(--pink-light);
+      border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+      opacity: 0;
+      animation: floatPetal linear infinite;
+    }
+
+    .f-flower {
+      position: absolute;
+      opacity: 0;
+      animation: floatPetal linear infinite;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    @keyframes floatPetal {
+      0% {
+        opacity: 0;
+        transform: translateY(-20px) rotate(0deg);
+      }
+
+      10% {
+        opacity: 0.6;
+      }
+
+      90% {
+        opacity: 0.4;
+      }
+
+      100% {
+        opacity: 0;
+        transform: translateY(100vh) rotate(360deg);
+      }
+    }
+
+    /* ═══════════════════════════════════════════════════════
+       PAGE 2 LEFT — MINI GAMES
+       ═══════════════════════════════════════════════════════ */
+    #page2-left {
+      align-items: center;
+      padding: 24px;
+      padding-top: 60px;
+    }
+
+    .game-container {
+      max-width: 420px;
+      width: 100%;
+      position: relative;
+      z-index: 2;
+    }
+
+    .game-header {
+      text-align: center;
+      margin-bottom: 24px;
+    }
+
+    .game-header h2 {
+      font-size: 1.6rem;
+      color: var(--text-dark);
+      margin-bottom: 8px;
+    }
+
+    .game-header p {
+      font-size: 14px;
+      color: var(--text-medium);
+    }
+
+    .game-step-indicator {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      margin-bottom: 28px;
+    }
+
+    .step-dot {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: var(--pink-pale);
+      border: 2px solid var(--pink-light);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 600;
+      font-size: 14px;
+      color: var(--pink);
+      transition: all 0.4s ease;
+    }
+
+    .step-dot.active {
+      background: var(--pink);
+      color: var(--white);
+      border-color: var(--pink);
+      box-shadow: 0 4px 15px var(--shadow-pink);
+    }
+
+    .step-dot.done {
+      background: #6BCB77;
+      border-color: #6BCB77;
+      color: var(--white);
+    }
+
+    .step-line {
+      width: 40px;
+      height: 2px;
+      background: var(--pink-lighter);
+      border-radius: 1px;
+    }
+
+    /* ── Puzzle Game ── */
+    #game1-section,
+    #game2-section {
+      transition: all 0.5s ease;
+    }
+
+    .puzzle-board {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 4px;
+      background: var(--pink-lighter);
+      border-radius: var(--radius);
+      padding: 4px;
+      margin: 0 auto 20px;
+      max-width: 300px;
+      aspect-ratio: 1;
+      box-shadow: 0 8px 30px var(--shadow-pink);
+    }
+
+    .puzzle-tile {
+      background: var(--pink);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 1.4rem;
+      color: var(--white);
+      cursor: pointer;
+      transition: all 0.2s ease;
+      aspect-ratio: 1;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+
+    .puzzle-tile:active {
+      transform: scale(0.92);
+    }
+
+    .puzzle-tile.empty {
+      background: transparent;
+      cursor: default;
+    }
+
+    .puzzle-tile.correct {
+      background: linear-gradient(135deg, #6BCB77 0%, #4CAF50 100%);
+    }
+
+    .puzzle-info {
+      text-align: center;
+      margin-bottom: 16px;
+    }
+
+    .puzzle-info span {
+      font-weight: 600;
+      color: var(--pink-deep);
+    }
+
+    .btn-skip {
+      display: none;
+      margin: 12px auto;
+      padding: 10px 24px;
+      border: 2px dashed var(--pink-light);
+      background: var(--white);
+      color: var(--pink);
+      border-radius: var(--radius);
+      font-family: 'Outfit', sans-serif;
+      font-weight: 500;
+      font-size: 13px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      animation: fadeIn 0.5s ease;
+    }
+
+    .btn-skip:hover {
+      background: var(--pink-pale);
+    }
+
+    .btn-skip.visible {
+      display: block;
+    }
+
+    /* ── Quiz Game ── */
+    .quiz-container {
+      background: var(--white);
+      border-radius: var(--radius-lg);
+      padding: 28px 24px;
+      box-shadow: 0 8px 30px var(--shadow-soft);
+    }
+
+    .quiz-progress {
+      display: flex;
+      gap: 6px;
+      margin-bottom: 20px;
+    }
+
+    .quiz-progress-bar {
+      flex: 1;
+      height: 4px;
+      background: var(--pink-pale);
+      border-radius: 2px;
+      overflow: hidden;
+    }
+
+    .quiz-progress-bar.filled {
+      background: linear-gradient(90deg, var(--pink), var(--pink-deep));
+    }
+
+    .quiz-question {
+      font-size: 15px;
+      font-weight: 500;
+      color: var(--text-dark);
+      margin-bottom: 16px;
+      line-height: 1.5;
+      min-height: 45px;
+    }
+
+    .quiz-question span {
+      display: block;
+      font-size: 12px;
+      color: var(--text-light);
+      margin-bottom: 6px;
+      font-weight: 400;
+    }
+
+    .quiz-hint-text {
+      font-size: 13px;
+      color: var(--pink-deep);
+      background: var(--pink-pale);
+      padding: 10px 14px;
+      border-radius: 8px;
+      margin-bottom: 16px;
+      border-left: 3px solid var(--pink);
+      animation: fadeIn 0.4s ease;
+      display: none;
+    }
+
+    .quiz-hint-text.show {
+      display: block;
+    }
+
+    .btn-hint-toggle {
+      background: none;
+      border: none;
+      color: var(--text-medium);
+      font-family: 'Outfit', sans-serif;
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-bottom: 12px;
+      margin-left: auto;
+      transition: color 0.3s ease;
+    }
+
+    .btn-hint-toggle:hover {
+      color: var(--pink);
+    }
+
+    .quiz-options {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .quiz-option-btn {
+      width: 100%;
+      padding: 14px 16px;
+      border: 2px solid var(--pink-lighter);
+      border-radius: 12px;
+      font-family: 'Outfit', sans-serif;
+      font-size: 15px;
+      color: var(--text-dark);
+      background: var(--pink-pale);
+      cursor: pointer;
+      text-align: left;
+      transition: all 0.3s ease;
+    }
+
+    .quiz-option-btn:hover {
+      border-color: var(--pink);
+      background: var(--white);
+      box-shadow: 0 0 0 4px rgba(255, 141, 161, 0.15);
+    }
+
+    .quiz-option-btn.shake {
+      animation: shake 0.5s ease;
+      border-color: #FF4444;
+      background: rgba(255, 68, 68, 0.1);
+    }
+
+    @keyframes shake {
+
+      0%,
+      100% {
+        transform: translateX(0);
+      }
+
+      20% {
+        transform: translateX(-8px);
+      }
+
+      40% {
+        transform: translateX(8px);
+      }
+
+      60% {
+        transform: translateX(-6px);
+      }
+
+      80% {
+        transform: translateX(6px);
+      }
+    }
+
+    .quiz-option-btn.correct-flash {
+      border-color: #6BCB77;
+      background: #F0FFF4;
+    }
+
+    /* ═══════════════════════════════════════════════════════
+       PAGE 3 LEFT — GALLERY
+       ═══════════════════════════════════════════════════════ */
+    #page3-left {
+      padding: 24px;
+      padding-top: 60px;
+    }
+
+    .gallery-wrapper {
+      max-width: 500px;
+      width: 100%;
+      margin: 0 auto;
+      position: relative;
+      z-index: 2;
+    }
+
+    .gallery-header {
+      text-align: center;
+      margin-bottom: 24px;
+    }
+
+    .gallery-header h2 {
+      font-size: 1.6rem;
+      color: var(--text-dark);
+      margin-bottom: 6px;
+    }
+
+    .gallery-header p {
+      font-size: 13px;
+      color: var(--text-medium);
+    }
+
+    /* Drag & Drop Zone */
+    .upload-zone {
+      border: 2px dashed var(--pink-light);
+      border-radius: var(--radius-lg);
+      padding: 28px;
+      text-align: center;
+      background: rgba(255, 255, 255, 0.7);
+      backdrop-filter: blur(8px);
+      cursor: pointer;
+      transition: all 0.3s ease;
+      margin-bottom: 24px;
+    }
+
+    .upload-zone:hover,
+    .upload-zone.drag-over {
+      border-color: var(--pink);
+      background: var(--pink-pale);
+      transform: scale(1.01);
+    }
+
+    .upload-zone i {
+      font-size: 32px;
+      color: var(--pink);
+      margin-bottom: 12px;
+    }
+
+    .upload-zone p {
+      font-size: 14px;
+      color: var(--text-medium);
+      line-height: 1.5;
+    }
+
+    .upload-zone p strong {
+      color: var(--pink-deep);
+    }
+
+    .photo-count {
+      text-align: center;
+      font-size: 13px;
+      color: var(--text-light);
+      margin-bottom: 16px;
+    }
+
+    .photo-count span {
+      font-weight: 600;
+      color: var(--pink-deep);
+    }
+
+    /* Gallery Grid */
+    .gallery-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+      padding-bottom: 100px;
+    }
+
+    .gallery-item {
+      position: relative;
+      border-radius: var(--radius);
+      overflow: hidden;
+      aspect-ratio: 1;
+      background: var(--pink-pale);
+      border: 2px dashed var(--pink-lighter);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .gallery-item.has-image {
+      border: none;
+      box-shadow: 0 4px 15px var(--shadow-soft);
+    }
+
+    .gallery-item.has-image:hover {
+      transform: scale(1.03);
+      box-shadow: 0 8px 25px var(--shadow-pink);
+    }
+
+    .gallery-item img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .gallery-item .placeholder-num {
+      font-size: 20px;
+      font-weight: 600;
+      color: var(--pink-lighter);
+    }
+
+    .gallery-item .remove-btn {
+      position: absolute;
+      top: 6px;
+      right: 6px;
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      background: rgba(0, 0, 0, 0.5);
+      color: white;
+      border: none;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 12px;
+    }
+
+    .gallery-item.has-image:hover .remove-btn {
+      display: flex;
+    }
+
+    /* Lightbox */
+    .lightbox {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.92);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 10000;
+      padding: 20px;
+      cursor: pointer;
+    }
+
+    .lightbox.show {
+      display: flex;
+      animation: fadeIn 0.3s ease;
+    }
+
+    .lightbox img {
+      max-width: 95%;
+      max-height: 90vh;
+      border-radius: 12px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+      object-fit: contain;
+    }
+
+    .lightbox-close {
+      position: absolute;
+      top: 16px;
+      right: 16px;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.15);
+      border: none;
+      color: white;
+      font-size: 18px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .lightbox-nav {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.15);
+      border: none;
+      color: white;
+      font-size: 18px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.2s;
+    }
+
+    .lightbox-nav:hover {
+      background: rgba(255, 255, 255, 0.3);
+    }
+
+    .lightbox-prev {
+      left: 12px;
+    }
+
+    .lightbox-next {
+      right: 12px;
+    }
+
+    /* ═══════════════════════════════════════════════════════
+       PAGE 2 RIGHT — SCHEDULING FORM
+       ═══════════════════════════════════════════════════════ */
+    #page2-right {
+      align-items: center;
+      padding: 24px;
+      padding-top: 60px;
+    }
+
+    .form-container {
+      max-width: 420px;
+      width: 100%;
+      position: relative;
+      z-index: 2;
+    }
+
+    .form-header {
+      text-align: center;
+      margin-bottom: 28px;
+    }
+
+    .form-header h2 {
+      font-size: 1.6rem;
+      color: var(--text-dark);
+      margin-bottom: 6px;
+    }
+
+    .form-header p {
+      font-size: 14px;
+      color: var(--text-medium);
+    }
+
+    .form-card {
+      background: var(--white);
+      border-radius: var(--radius-lg);
+      padding: 28px 24px;
+      box-shadow: 0 8px 30px var(--shadow-soft);
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    .form-label {
+      display: block;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-medium);
+      margin-bottom: 8px;
+      letter-spacing: 0.5px;
+    }
+
+    .form-label i {
+      margin-right: 6px;
+      color: var(--pink);
+    }
+
+    .form-input,
+    .form-select {
+      width: 100%;
+      padding: 14px 16px;
+      border: 2px solid var(--pink-lighter);
+      border-radius: 12px;
+      font-family: 'Outfit', sans-serif;
+      font-size: 15px;
+      color: var(--text-dark);
+      background: var(--pink-pale);
+      outline: none;
+      transition: all 0.3s ease;
+      -webkit-appearance: none;
+      appearance: none;
+    }
+
+    .form-input:focus,
+    .form-select:focus {
+      border-color: var(--pink);
+      background: var(--white);
+      box-shadow: 0 0 0 4px rgba(255, 141, 161, 0.15);
+    }
+
+    .form-select {
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='%23FF8DA1'%3E%3Cpath d='M7 10l5 5 5-5z'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 16px center;
+      padding-right: 40px;
+    }
+
+    /* Time input container */
+    .time-input-group {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .time-input-group .form-input {
+      flex: 1;
+      text-align: center;
+      font-size: 20px;
+      font-weight: 600;
+      padding: 12px 8px;
+    }
+
+    .time-separator {
+      font-size: 24px;
+      font-weight: 700;
+      color: var(--pink);
+    }
+
+    /* Custom Calendar */
+    .calendar-widget {
+      background: var(--white);
+      border: 2px solid var(--pink-lighter);
+      border-radius: var(--radius);
+      padding: 16px;
+      margin-top: 4px;
+    }
+
+    .calendar-nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 12px;
+    }
+
+    .calendar-nav button {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      border: none;
+      background: var(--pink-pale);
+      color: var(--pink);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      transition: all 0.2s ease;
+    }
+
+    .calendar-nav button:hover {
+      background: var(--pink);
+      color: var(--white);
+    }
+
+    .calendar-month-label {
+      font-weight: 600;
+      font-size: 15px;
+      color: var(--text-dark);
+    }
+
+    .calendar-weekdays {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 2px;
+      margin-bottom: 6px;
+    }
+
+    .calendar-weekdays span {
+      text-align: center;
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text-light);
+      padding: 4px;
+    }
+
+    .calendar-days {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 2px;
+    }
+
+    .calendar-day {
+      aspect-ratio: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text-dark);
+      cursor: pointer;
+      transition: all 0.2s ease;
+      border: none;
+      background: none;
+    }
+
+    .calendar-day:hover {
+      background: var(--pink-pale);
+    }
+
+    .calendar-day.today {
+      border: 2px solid var(--pink-light);
+    }
+
+    .calendar-day.selected {
+      background: var(--pink);
+      color: var(--white);
+      font-weight: 700;
+      box-shadow: 0 2px 8px var(--shadow-pink);
+    }
+
+    .calendar-day.other-month {
+      color: var(--pink-lighter);
+    }
+
+    .calendar-day.disabled {
+      opacity: 0.3;
+      pointer-events: none;
+    }
+
+    .date-display {
+      margin-top: 10px;
+      padding: 10px 16px;
+      background: var(--pink-pale);
+      border-radius: 10px;
+      font-size: 14px;
+      color: var(--text-dark);
+      text-align: center;
+      font-weight: 500;
+    }
+
+    .btn-submit {
+      width: 100%;
+      padding: 16px;
+      border: none;
+      border-radius: var(--radius);
+      background: linear-gradient(135deg, var(--pink) 0%, var(--pink-deep) 100%);
+      color: var(--white);
+      font-family: 'Outfit', sans-serif;
+      font-weight: 600;
+      font-size: 16px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 8px 25px var(--shadow-pink);
+      margin-top: 8px;
+    }
+
+    .btn-submit:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 12px 35px rgba(255, 141, 161, 0.5);
+    }
+
+    .btn-submit:active {
+      transform: translateY(0);
+    }
+
+    .btn-submit:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .btn-submit i {
+      margin-right: 8px;
+    }
+
+    /* ═══════════════════════════════════════════════════════
+       PAGE 3 RIGHT — VIRTUAL TICKET
+       ═══════════════════════════════════════════════════════ */
+    #page3-right {
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+
+    .ticket-wrapper {
+      max-width: 420px;
+      width: 100%;
+      position: relative;
+      z-index: 2;
+    }
+
+    .ticket-header {
+      text-align: center;
+      margin-bottom: 24px;
+    }
+
+    .ticket-header h2 {
+      font-size: 1.5rem;
+      color: var(--text-dark);
+    }
+
+    .ticket-card {
+      background: var(--white);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      box-shadow: 0 16px 50px var(--shadow-pink);
+      position: relative;
+    }
+
+    .ticket-top {
+      background: linear-gradient(135deg, var(--pink) 0%, var(--pink-deep) 100%);
+      padding: 28px 24px 20px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .ticket-top::before {
+      content: '';
+      position: absolute;
+      top: -30px;
+      right: -30px;
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.1);
+    }
+
+    .ticket-top::after {
+      content: '';
+      position: absolute;
+      bottom: -20px;
+      left: -20px;
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.08);
+    }
+
+    .ticket-event-name {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.4rem;
+      color: var(--white);
+      font-weight: 700;
+      margin-bottom: 4px;
+      position: relative;
+    }
+
+    .ticket-event-subtitle {
+      font-size: 13px;
+      color: rgba(255, 255, 255, 0.8);
+      font-weight: 300;
+    }
+
+    /* Ticket tear line */
+    .ticket-tear {
+      display: flex;
+      align-items: center;
+      position: relative;
+    }
+
+    .ticket-tear::before,
+    .ticket-tear::after {
+      content: '';
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: var(--pink-pale);
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+    }
+
+    .ticket-tear::before {
+      left: -10px;
+    }
+
+    .ticket-tear::after {
+      right: -10px;
+    }
+
+    .tear-line {
+      flex: 1;
+      border-top: 2px dashed var(--pink-lighter);
+      margin: 0 16px;
+    }
+
+    .ticket-body {
+      padding: 20px 24px 24px;
+    }
+
+    .ticket-detail {
+      display: flex;
+      align-items: flex-start;
+      gap: 14px;
+      margin-bottom: 16px;
+    }
+
+    .ticket-detail:last-child {
+      margin-bottom: 0;
+    }
+
+    .ticket-detail-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 12px;
+      background: var(--pink-pale);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--pink);
+      font-size: 16px;
+      flex-shrink: 0;
+    }
+
+    .ticket-detail-text {
+      flex: 1;
+    }
+
+    .ticket-detail-label {
+      font-size: 11px;
+      color: var(--text-light);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      font-weight: 600;
+    }
+
+    .ticket-detail-value {
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--text-dark);
+      margin-top: 2px;
+    }
+
+    .ticket-footer {
+      padding: 16px 24px;
+      background: var(--pink-pale);
+      text-align: center;
+      font-size: 12px;
+      color: var(--text-light);
+    }
+
+    .ticket-barcode {
+      display: flex;
+      justify-content: center;
+      gap: 2px;
+      margin-bottom: 6px;
+    }
+
+    .ticket-barcode span {
+      display: block;
+      height: 30px;
+      background: var(--text-dark);
+      border-radius: 1px;
+    }
+
+    .ticket-actions {
+      display: flex;
+      gap: 12px;
+      margin-top: 20px;
+    }
+
+    .btn-save-ticket {
+      flex: 1;
+      padding: 14px;
+      border: none;
+      border-radius: var(--radius);
+      background: linear-gradient(135deg, var(--pink) 0%, var(--pink-deep) 100%);
+      color: var(--white);
+      font-family: 'Outfit', sans-serif;
+      font-weight: 600;
+      font-size: 14px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 15px var(--shadow-pink);
+    }
+
+    .btn-save-ticket:hover {
+      transform: translateY(-2px);
+    }
+
+    /* ═══════════════════════════════════════════════════════
+       BACK BUTTON (Reusable)
+       ═══════════════════════════════════════════════════════ */
+    .btn-back {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 12px 24px;
+      border: 2px solid var(--pink-light);
+      background: var(--white);
+      color: var(--pink);
+      border-radius: var(--radius);
+      font-family: 'Outfit', sans-serif;
+      font-weight: 500;
+      font-size: 14px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      margin-top: 16px;
+    }
+
+    .btn-back:hover {
+      background: var(--pink);
+      color: var(--white);
+      border-color: var(--pink);
+    }
+
+    /* ═══════════════════════════════════════════════════════
+       CONFETTI
+       ═══════════════════════════════════════════════════════ */
+    .confetti-container {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 9998;
+      overflow: hidden;
+    }
+
+    .confetti-piece {
+      position: absolute;
+      width: 10px;
+      height: 10px;
+      top: -10px;
+      animation: confettiFall linear forwards;
+    }
+
+    @keyframes confettiFall {
+      0% {
+        transform: translateY(0) rotate(0deg) scale(1);
+        opacity: 1;
+      }
+
+      100% {
+        transform: translateY(100vh) rotate(720deg) scale(0.5);
+        opacity: 0;
+      }
+    }
+
+    /* ═══════════════════════════════════════════════════════
+       LOADING OVERLAY
+       ═══════════════════════════════════════════════════════ */
+    .loading-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(255, 248, 249, 0.95);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 10001;
+      transition: opacity 0.5s ease;
+    }
+
+    .loading-overlay.hidden {
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .loading-spinner {
+      width: 48px;
+      height: 48px;
+      border: 3px solid var(--pink-lighter);
+      border-top-color: var(--pink);
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+
+    .loading-text {
+      margin-top: 16px;
+      font-size: 14px;
+      color: var(--text-medium);
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    /* ═══════════════════════════════════════════════════════
+       ANIMATIONS
+       ═══════════════════════════════════════════════════════ */
+    @keyframes fadeDown {
+      from {
+        opacity: 0;
+        transform: translateY(-20px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes fadeUp {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+      }
+
+      to {
+        opacity: 1;
+      }
+    }
+
+    /* ═══════════════════════════════════════════════════════
+       TOAST NOTIFICATIONS
+       ═══════════════════════════════════════════════════════ */
+    .toast {
+      position: fixed;
+      bottom: 30px;
+      left: 50%;
+      transform: translateX(-50%) translateY(100px);
+      background: var(--text-dark);
+      color: white;
+      padding: 12px 24px;
+      border-radius: 12px;
+      font-size: 14px;
+      font-weight: 500;
+      z-index: 10002;
+      transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
+      text-align: center;
+      max-width: 90vw;
+    }
+
+    .toast.show {
+      transform: translateX(-50%) translateY(0);
+    }
+
+    .toast.success {
+      background: linear-gradient(135deg, #6BCB77 0%, #4CAF50 100%);
+    }
+
+    .toast.error {
+      background: linear-gradient(135deg, #FF6B6B 0%, #EE5A24 100%);
+    }
+
+    /* ═══════════════════════════════════════════════════════
+       SCROLL BAR STYLING
+       ═══════════════════════════════════════════════════════ */
+    ::-webkit-scrollbar {
+      width: 4px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: var(--pink-light);
+      border-radius: 2px;
+    }
+
+    /* ═══════════════════════════════════════════════════════
+       RESPONSIVE FIXES
+       ═══════════════════════════════════════════════════════ */
+    @media (max-width: 380px) {
+      .home-title {
+        font-size: 2rem;
+      }
+
+      .home-buttons {
+        flex-direction: column;
+      }
+
+      .puzzle-board {
+        max-width: 260px;
+      }
+    }
+
+    @media (min-width: 600px) {
+      .gallery-grid {
+        grid-template-columns: repeat(3, 1fr);
+      }
+    }
+
+    @media (min-width: 768px) {
+      .home-title {
+        font-size: 3rem;
+      }
+
+      .peony-container {
+        width: 400px;
+        height: 400px;
+      }
+
+      .gallery-grid {
+        grid-template-columns: repeat(4, 1fr);
+        gap: 16px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- ═══════════ LOADING SCREEN ═══════════ -->
+  <div class="loading-overlay" id="loading-overlay">
+    <div class="loading-spinner"></div>
+    <p class="loading-text">Menyiapkan sesuatu yang spesial...</p>
+  </div>
+
+  <!-- ═══════════ MUSIC PLAYER ═══════════ -->
+  <!-- 
+    Ganti 'src' audio di bawah ini dengan file musik Anda.
+    Taruh file .mp3 di folder yang sama, lalu ubah src-nya.
+  -->
+  <audio id="bg-music" loop preload="auto">
+    <source src="lagu fix.mp3" type="audio/mpeg">
+  </audio>
+  <button id="music-btn" title="Play/Pause Musik" aria-label="Toggle music">
+    <i class="fa-solid fa-music"></i>
+  </button>
+
+  <!-- ═══════════ PEONY FLOWER (CSS Art) ═══════════ -->
+  <div class="peony-container" id="peony-container">
+    <div class="peony bud" id="peony">
+      <!-- Core -->
+      <div class="petal petal-core" style="--r: 0deg;"></div>
+      <!-- Inner petals (ring 1) -->
+      <div class="petal petal-inner" style="--r: 0deg;"></div>
+      <div class="petal petal-inner" style="--r: 45deg;"></div>
+      <div class="petal petal-inner" style="--r: 90deg;"></div>
+      <div class="petal petal-inner" style="--r: 135deg;"></div>
+      <div class="petal petal-inner" style="--r: 180deg;"></div>
+      <div class="petal petal-inner" style="--r: 225deg;"></div>
+      <div class="petal petal-inner" style="--r: 270deg;"></div>
+      <div class="petal petal-inner" style="--r: 315deg;"></div>
+      <!-- Middle petals (ring 2) -->
+      <div class="petal petal-mid" style="--r: 20deg;"></div>
+      <div class="petal petal-mid" style="--r: 65deg;"></div>
+      <div class="petal petal-mid" style="--r: 110deg;"></div>
+      <div class="petal petal-mid" style="--r: 155deg;"></div>
+      <div class="petal petal-mid" style="--r: 200deg;"></div>
+      <div class="petal petal-mid" style="--r: 245deg;"></div>
+      <div class="petal petal-mid" style="--r: 290deg;"></div>
+      <div class="petal petal-mid" style="--r: 335deg;"></div>
+      <!-- Outer petals (ring 3) -->
+      <div class="petal petal-outer" style="--r: 10deg;"></div>
+      <div class="petal petal-outer" style="--r: 40deg;"></div>
+      <div class="petal petal-outer" style="--r: 70deg;"></div>
+      <div class="petal petal-outer" style="--r: 100deg;"></div>
+      <div class="petal petal-outer" style="--r: 130deg;"></div>
+      <div class="petal petal-outer" style="--r: 160deg;"></div>
+      <div class="petal petal-outer" style="--r: 190deg;"></div>
+      <div class="petal petal-outer" style="--r: 220deg;"></div>
+      <div class="petal petal-outer" style="--r: 250deg;"></div>
+      <div class="petal petal-outer" style="--r: 280deg;"></div>
+      <div class="petal petal-outer" style="--r: 310deg;"></div>
+      <div class="petal petal-outer" style="--r: 340deg;"></div>
+    </div>
+    <div class="peony-glow"></div>
+  </div>
+
+  <!-- ═══════════ APP CONTAINER ═══════════ -->
+  <div class="app-container" id="app">
+
+    <!-- Floating petals background (Global) -->
+    <div class="floating-petals" id="floating-petals"></div>
+
+    <!-- ═══════════════════════════════════════
+         PAGE 1 — HOME
+         ═══════════════════════════════════════ -->
+    <div class="page active" id="page1">
+
+      <div class="home-content">
+        <div class="home-title-wrapper">
+          <p class="home-subtitle">✿ Welcome ✿</p>
+          <h1 class="home-title"> <span></span><br>Rsy<span>Khai</span></h1>
+          <div class="home-divider"></div>
+          <p class="home-tagline">
+            rawamangun & lowokwaru😈<br></p>
+        </div>
+
+        <div class="home-buttons">
+          <button class="home-btn home-btn-left" id="btn-kenangan" onclick="navigateTo('page2-left')">
+            memories<br>RsyKhai
+          </button>
+          <button class="home-btn home-btn-right" id="btn-ajakan" onclick="navigateTo('page2-right')">
+            <i class="fa-solid fa-calendar-heart"></i>
+            Ajakan<br>Main
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════
+         PAGE 2 LEFT — MINI GAMES
+         ═══════════════════════════════════════ -->
+    <div class="page enter-right" id="page2-left">
+      <div class="game-container">
+        <div class="game-header">
+          <h2>🧩 Jawab dulu😈</h2>
+          <p>Selesaikan dua tantangan untuk membuka galeri foto!</p>
+        </div>
+
+        <div class="game-step-indicator">
+          <div class="step-dot active" id="step1-dot">1</div>
+          <div class="step-line"></div>
+          <div class="step-dot" id="step2-dot">2</div>
+        </div>
+
+        <!-- Game 1: Puzzle -->
+        <div id="game1-section">
+          <div class="puzzle-info">
+            <p>Susun puzzle ini! Percobaan: <span id="attempt-count">0</span></p>
+          </div>
+          <div class="puzzle-board" id="puzzle-board"></div>
+          <button class="btn-skip visible" id="btn-skip" onclick="skipPuzzle()">
+            <i class="fa-solid fa-forward"></i> Skip Puzzle
+          </button>
+          <div style="text-align:center; margin-top:8px;">
+            <button class="btn-back" onclick="navigateTo('page1')" style="margin-top:0;">
+              <i class="fa-solid fa-arrow-left"></i> Kembali
+            </button>
+          </div>
+        </div>
+
+        <!-- Game 2: Quiz -->
+        <div id="game2-section" style="display:none;">
+          <div class="quiz-container">
+            <div class="quiz-progress" id="quiz-progress"></div>
+            <div class="quiz-question" id="quiz-question"></div>
+            <div class="quiz-hint-text" id="quiz-hint-text"></div>
+            <div id="quiz-options" class="quiz-options"></div>
+            <button class="btn-hint-toggle" id="btn-hint-toggle" onclick="toggleHint()" style="margin-top: 16px;">
+              <i class="fa-solid fa-lightbulb"></i> Lihat Hint
+            </button>
+          </div>
+          <div style="text-align:center;">
+            <button class="btn-back" onclick="navigateTo('page1')">
+              <i class="fa-solid fa-arrow-left"></i> Kembali
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════
+         PAGE 3 LEFT — GALLERY
+         ═══════════════════════════════════════ -->
+    <div class="page enter-right" id="page3-left">
+      <div class="gallery-wrapper">
+        <div class="gallery-header">
+          <h2>📸 Galeri RsyKhai</h2>
+          <p>our memories</p>
+        </div>
+
+        <!-- Upload zone -->
+        <div class="upload-zone" id="upload-zone">
+          <i class="fa-solid fa-cloud-arrow-up"></i>
+          <p><strong>Seret foto ke sini</strong> atau ketuk untuk memilih</p>
+          <p style="font-size:12px; margin-top:6px; color:var(--text-light)">Format: JPG, PNG, WebP</p>
+          <input type="file" id="file-input" multiple accept="image/*,video/*" style="display:none;">
+        </div>
+
+        <div class="photo-count">
+          Foto terupload: <span id="photo-count-num">0</span> / 100
+        </div>
+
+        <div class="gallery-grid" id="gallery-grid"></div>
+
+        <div style="text-align:center; padding: 20px 0 40px;">
+          <button class="btn-back" onclick="navigateTo('page1')" id="btn-gallery-back">
+            <i class="fa-solid fa-arrow-left"></i> Kembali ke Menu Utama
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════
+         PAGE 2 RIGHT — SCHEDULING FORM
+         ═══════════════════════════════════════ -->
+    <div class="page enter-right" id="page2-right">
+      <div class="form-container">
+        <div class="form-header">
+          <h2>💌 Ajakan Main</h2>
+          <p>Isi detail rencana kita yuk!</p>
+        </div>
+
+        <div class="form-card">
+          <!-- Tempat -->
+          <div class="form-group">
+            <label class="form-label"><i class="fa-solid fa-location-dot"></i> Pilihan Tempat</label>
+            <select class="form-select" id="input-tempat">
+              <option value="">— Pilih tempat —</option>
+              <option value="Cafe & Coffee Shop">☕ Cafe & Coffee Shop</option>
+              <option value="Mall / Pusat Perbelanjaan">🛍️ Mall / Pusat Perbelanjaan</option>
+              <option value="Taman / Outdoor">🌳 Taman / Outdoor</option>
+              <option value="Bioskop">🎬 Bioskop</option>
+              <option value="Restoran">🍽️ Restoran</option>
+              <option value="Pantai">🏖️ Pantai</option>
+              <option value="Museum / Galeri">🎨 Museum / Galeri</option>
+              <option value="custom">✏️ Tempat lainnya...</option>
+            </select>
+            <input type="text" class="form-input" id="input-tempat-custom" placeholder="Tulis tempatnya..."
+              style="display:none; margin-top:8px;">
+          </div>
+
+          <!-- Waktu -->
+          <div class="form-group">
+            <label class="form-label"><i class="fa-solid fa-clock"></i> Waktu</label>
+            <div class="time-input-group">
+              <input type="text" class="form-input" id="input-jam" inputmode="numeric" pattern="[0-9]*" placeholder="HH"
+                maxlength="2">
+              <span class="time-separator">:</span>
+              <input type="text" class="form-input" id="input-menit" inputmode="numeric" pattern="[0-9]*"
+                placeholder="MM" maxlength="2">
+            </div>
+          </div>
+
+          <!-- Tanggal -->
+          <div class="form-group">
+            <label class="form-label"><i class="fa-solid fa-calendar-days"></i> Tanggal</label>
+            <div class="calendar-widget" id="calendar-widget">
+              <div class="calendar-nav">
+                <button onclick="calendarPrev()" aria-label="Bulan sebelumnya"><i
+                    class="fa-solid fa-chevron-left"></i></button>
+                <span class="calendar-month-label" id="calendar-month-label"></span>
+                <button onclick="calendarNext()" aria-label="Bulan berikutnya"><i
+                    class="fa-solid fa-chevron-right"></i></button>
+              </div>
+              <div class="calendar-weekdays">
+                <span>Min</span><span>Sen</span><span>Sel</span><span>Rab</span>
+                <span>Kam</span><span>Jum</span><span>Sab</span>
+              </div>
+              <div class="calendar-days" id="calendar-days"></div>
+              <div class="date-display" id="date-display">Belum dipilih</div>
+            </div>
+          </div>
+
+          <!-- Submit -->
+          <button class="btn-submit" id="btn-submit-ajakan" onclick="submitAjakan()">
+            <i class="fa-solid fa-paper-plane"></i> Kirim Ajakan
+          </button>
+        </div>
+
+        <div style="text-align:center;">
+          <button class="btn-back" onclick="navigateTo('page1')">
+            <i class="fa-solid fa-arrow-left"></i> Kembali
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════
+         PAGE 3 RIGHT — VIRTUAL TICKET
+         ═══════════════════════════════════════ -->
+    <div class="page enter-right" id="page3-right">
+      <div class="ticket-wrapper">
+        <div class="ticket-header">
+          <h2>🎫 Tiket Ajakan Main</h2>
+        </div>
+
+        <div class="ticket-card" id="ticket-card">
+          <div class="ticket-top">
+            <div class="ticket-event-name">✿ Jadwal main!!! ✿</div>
+            <div class="ticket-event-subtitle">RSY & Khai — main barengs</div>
+          </div>
+          <div class="ticket-tear">
+            <div class="tear-line"></div>
+          </div>
+          <div class="ticket-body">
+            <div class="ticket-detail">
+              <div class="ticket-detail-icon"><i class="fa-solid fa-location-dot"></i></div>
+              <div class="ticket-detail-text">
+                <div class="ticket-detail-label">Tempat</div>
+                <div class="ticket-detail-value" id="ticket-tempat">—</div>
+              </div>
+            </div>
+            <div class="ticket-detail">
+              <div class="ticket-detail-icon"><i class="fa-solid fa-clock"></i></div>
+              <div class="ticket-detail-text">
+                <div class="ticket-detail-label">Waktu</div>
+                <div class="ticket-detail-value" id="ticket-waktu">—</div>
+              </div>
+            </div>
+            <div class="ticket-detail">
+              <div class="ticket-detail-icon"><i class="fa-solid fa-calendar-days"></i></div>
+              <div class="ticket-detail-text">
+                <div class="ticket-detail-label">Tanggal</div>
+                <div class="ticket-detail-value" id="ticket-tanggal">—</div>
+              </div>
+            </div>
+          </div>
+          <div class="ticket-footer">
+            <div class="ticket-barcode" id="ticket-barcode"></div>
+            <p>Simpan tiket ini sebagai bukti janji kita</p>
+          </div>
+        </div>
+
+        <div class="ticket-actions">
+          <button class="btn-save-ticket" onclick="saveTicket()">
+            <i class="fa-solid fa-download"></i> Simpan Tiket
+          </button>
+          <button class="btn-back" onclick="navigateTo('page1')" style="margin-top:0; flex:1; justify-content:center;">
+            <i class="fa-solid fa-arrow-left"></i> Kembali
+          </button>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- end .app-container -->
+
+  <!-- ═══════════ LIGHTBOX ═══════════ -->
+  <div class="lightbox" id="lightbox" onclick="closeLightbox(event)">
+    <button class="lightbox-close" onclick="closeLightbox(event)"><i class="fa-solid fa-xmark"></i></button>
+    <button class="lightbox-nav lightbox-prev" onclick="event.stopPropagation(); lightboxNav(-1)"><i
+        class="fa-solid fa-chevron-left"></i></button>
+    <img id="lightbox-img" src="" alt="Foto kenangan">
+    <video id="lightbox-vid" src="" controls
+      style="display:none; max-width: 90vw; max-height: 80vh; border-radius: 8px;"></video>
+    <button class="lightbox-nav lightbox-next" onclick="event.stopPropagation(); lightboxNav(1)"><i
+        class="fa-solid fa-chevron-right"></i></button>
+  </div>
+
+  <!-- ═══════════ CONFETTI CONTAINER ═══════════ -->
+  <div class="confetti-container" id="confetti-container"></div>
+
+  <!-- ═══════════ TOAST ═══════════ -->
+  <div class="toast" id="toast"></div>
+
+  <script>
+    /* ═══════════════════════════════════════════════════════
+       INITIALIZATION
+       ═══════════════════════════════════════════════════════ */
+    window.addEventListener('load', () => {
+      setTimeout(() => {
+        document.getElementById('loading-overlay').classList.add('hidden');
+      }, 800);
+      createFloatingPetals();
+      initPuzzle();
+      initQuiz();
+      initGallery();
+      initCalendar();
+      generateBarcode();
+    });
+
+    /* ═══════════════════════════════════════════════════════
+       MUSIC PLAYER
+       ═══════════════════════════════════════════════════════ */
+    const musicBtn = document.getElementById('music-btn');
+    const bgMusic = document.getElementById('bg-music');
+    let isMusicPlaying = false;
+
+    musicBtn.addEventListener('click', () => {
+      if (isMusicPlaying) {
+        bgMusic.pause();
+        musicBtn.classList.remove('playing');
+        musicBtn.innerHTML = '<i class="fa-solid fa-music"></i>';
+      } else {
+        bgMusic.play().catch(() => { });
+        musicBtn.classList.add('playing');
+        musicBtn.innerHTML = '<i class="fa-solid fa-pause"></i>';
+      }
+      isMusicPlaying = !isMusicPlaying;
+    });
+
+    /* ═══════════════════════════════════════════════════════
+       PEONY BLOOM STATE
+       ═══════════════════════════════════════════════════════ */
+    const peony = document.getElementById('peony');
+    const peonyContainer = document.getElementById('peony-container');
+
+    function setPeonyState(state) {
+      peony.className = 'peony ' + state;
+      if (state === 'full') {
+        peonyContainer.style.opacity = '0.25';
+      } else if (state === 'half') {
+        peonyContainer.style.opacity = '0.2';
+      } else {
+        peonyContainer.style.opacity = '0.15';
+      }
+    }
+
+    /* ═══════════════════════════════════════════════════════
+       PAGE NAVIGATION
+       ═══════════════════════════════════════════════════════ */
+    let currentPage = 'page1';
+
+    function navigateTo(targetId) {
+      if (targetId === currentPage) return;
+
+      const currentEl = document.getElementById(currentPage);
+      const targetEl = document.getElementById(targetId);
+
+      // Determine direction
+      const pageOrder = ['page1', 'page2-left', 'page3-left', 'page2-right', 'page3-right'];
+      const curIdx = pageOrder.indexOf(currentPage);
+      const tarIdx = pageOrder.indexOf(targetId);
+      const goingForward = tarIdx > curIdx || (currentPage === 'page1' && targetId !== 'page1');
+
+      // Exit current page
+      currentEl.classList.remove('active');
+      currentEl.classList.add(goingForward ? 'exit-left' : 'exit-right');
+
+      // Prepare target
+      targetEl.classList.remove('enter-left', 'enter-right', 'exit-left', 'exit-right');
+      targetEl.classList.add(goingForward ? 'enter-right' : 'enter-left');
+
+      // Force reflow
+      targetEl.offsetHeight;
+
+      // Animate in
+      requestAnimationFrame(() => {
+        targetEl.classList.remove('enter-left', 'enter-right');
+        targetEl.classList.add('active');
+      });
+
+      // Clean up after transition
+      setTimeout(() => {
+        currentEl.classList.remove('exit-left', 'exit-right');
+      }, 750);
+
+      // Update peony state
+      if (targetId === 'page1') {
+        setPeonyState('bud');
+      } else if (targetId === 'page2-left' || targetId === 'page2-right') {
+        setPeonyState('half');
+      } else if (targetId === 'page3-left' || targetId === 'page3-right') {
+        setPeonyState('full');
+      }
+
+      // Scroll target to top
+      targetEl.scrollTop = 0;
+      currentPage = targetId;
+    }
+
+    /* ═══════════════════════════════════════════════════════
+       FLOATING PETALS (Page 1 BG)
+       ═══════════════════════════════════════════════════════ */
+    function createFloatingPetals() {
+      const container = document.getElementById('floating-petals');
+      const colors = ['#FFB3C1', '#FFD6DE', '#FF8DA1', '#FFF0F3', '#FFCCD5'];
+
+      // Banyak kelopak bunga
+      for (let i = 0; i < 60; i++) {
+        const petal = document.createElement('div');
+        petal.className = 'f-petal';
+        petal.style.left = Math.random() * 100 + '%';
+        petal.style.width = (8 + Math.random() * 10) + 'px';
+        petal.style.height = (10 + Math.random() * 14) + 'px';
+        petal.style.background = colors[Math.floor(Math.random() * colors.length)];
+        petal.style.animationDuration = (5 + Math.random() * 12) + 's';
+        petal.style.animationDelay = (Math.random() * 10) + 's';
+        petal.style.opacity = 0;
+        container.appendChild(petal);
+      }
+
+      // Elemen bunga utuh (emoji)
+      const flowerEmojis = ['🌸', '💮', '🌺'];
+      for (let i = 0; i < 30; i++) {
+        const flower = document.createElement('div');
+        flower.className = 'f-flower';
+        flower.innerHTML = flowerEmojis[Math.floor(Math.random() * flowerEmojis.length)];
+        flower.style.left = Math.random() * 100 + '%';
+        flower.style.fontSize = (12 + Math.random() * 18) + 'px';
+        flower.style.animationDuration = (6 + Math.random() * 15) + 's';
+        flower.style.animationDelay = (Math.random() * 12) + 's';
+        flower.style.opacity = 0;
+        container.appendChild(flower);
+      }
+    }
+
+    /* ═══════════════════════════════════════════════════════
+       GAME 1: SLIDING PUZZLE (3x3)
+       ═══════════════════════════════════════════════════════ */
+    let puzzleState = [];
+    let attempts = 0;
+    const PUZZLE_SIZE = 3;
+    const TOTAL_TILES = PUZZLE_SIZE * PUZZLE_SIZE;
+
+    function initPuzzle() {
+      // Start with solved state and shuffle
+      puzzleState = Array.from({ length: TOTAL_TILES - 1 }, (_, i) => i + 1);
+      puzzleState.push(0); // 0 = empty
+      shufflePuzzle();
+      renderPuzzle();
+    }
+
+    function shufflePuzzle() {
+      // Perform valid moves to ensure solvability
+      let emptyIdx = puzzleState.indexOf(0);
+      for (let i = 0; i < 200; i++) {
+        const neighbors = getNeighbors(emptyIdx);
+        const randomNeighbor = neighbors[Math.floor(Math.random() * neighbors.length)];
+        [puzzleState[emptyIdx], puzzleState[randomNeighbor]] = [puzzleState[randomNeighbor], puzzleState[emptyIdx]];
+        emptyIdx = randomNeighbor;
+      }
+    }
+
+    function getNeighbors(idx) {
+      const row = Math.floor(idx / PUZZLE_SIZE);
+      const col = idx % PUZZLE_SIZE;
+      const neighbors = [];
+      if (row > 0) neighbors.push(idx - PUZZLE_SIZE);
+      if (row < PUZZLE_SIZE - 1) neighbors.push(idx + PUZZLE_SIZE);
+      if (col > 0) neighbors.push(idx - 1);
+      if (col < PUZZLE_SIZE - 1) neighbors.push(idx + 1);
+      return neighbors;
+    }
+
+    function renderPuzzle() {
+      const board = document.getElementById('puzzle-board');
+      board.innerHTML = '';
+      puzzleState.forEach((val, idx) => {
+        const tile = document.createElement('div');
+        tile.className = 'puzzle-tile';
+        if (val === 0) {
+          tile.classList.add('empty');
+        } else {
+          tile.textContent = val;
+          // Check if tile is in correct position
+          if (val === idx + 1) {
+            tile.classList.add('correct');
+          }
+          tile.addEventListener('click', () => moveTile(idx));
+        }
+        board.appendChild(tile);
+      });
+    }
+
+    function moveTile(idx) {
+      const emptyIdx = puzzleState.indexOf(0);
+      const neighbors = getNeighbors(emptyIdx);
+
+      if (neighbors.includes(idx)) {
+        [puzzleState[emptyIdx], puzzleState[idx]] = [puzzleState[idx], puzzleState[emptyIdx]];
+        attempts++;
+        document.getElementById('attempt-count').textContent = attempts;
+
+        // Skip button is always visible
+
+        renderPuzzle();
+
+        // Check if solved
+        if (isPuzzleSolved()) {
+          showToast('🎉 Puzzle selesai! Lanjut ke kuis...', 'success');
+          setTimeout(startGame2, 1200);
+        }
+      }
+    }
+
+    function isPuzzleSolved() {
+      for (let i = 0; i < TOTAL_TILES - 1; i++) {
+        if (puzzleState[i] !== i + 1) return false;
+      }
+      return true;
+    }
+
+    function skipPuzzle() {
+      showToast('Puzzle di-skip! Lanjut ke kuis... 🎮', 'success');
+      setTimeout(startGame2, 800);
+    }
+
+    function startGame2() {
+      document.getElementById('game1-section').style.display = 'none';
+      document.getElementById('game2-section').style.display = 'block';
+      document.getElementById('step1-dot').classList.remove('active');
+      document.getElementById('step1-dot').classList.add('done');
+      document.getElementById('step1-dot').innerHTML = '<i class="fa-solid fa-check" style="font-size:14px;"></i>';
+      document.getElementById('step2-dot').classList.add('active');
+      renderQuiz();
+    }
+
+    /* ═══════════════════════════════════════════════════════
+       GAME 2: QUIZ PASSWORD (5 Questions)
+       ═══════════════════════════════════════════════════════ */
+    /*
+     * ╔═══════════════════════════════════════════════════════╗
+     * ║  ISI PERTANYAAN & JAWABAN DI SINI!                   ║
+     * ║  Ganti teks question dan answer di bawah ini.        ║
+     * ║  Jawaban tidak case-sensitive (otomatis lowercase).   ║
+     * ╚═══════════════════════════════════════════════════════╝
+     */
+    const quizData = [
+      {
+        question: "Pertanyaan 1: Siapa guru paling ngeselin?",
+        options: ["pak ibnu", "pak nana", "bu licah"],
+        answer: ["pak nana"],
+        hint: "guru pjok"
+      },
+      {
+        question: "Pertanyaan 2: Apa warna motor rasya?",
+        options: ["merah", "putih", "pink"],
+        answer: ["merah"],
+        hint: "identik dengan marah"
+      },
+      {
+        question: "Pertanyaan 3: Kampus khairani?",
+        options: ["UB", "Universitas Brawijaya", "yuenjeh"],
+        answer: ["yuenjeh"],
+        hint: "panas, gersang, rawamangun"
+      },
+      {
+        question: "Pertanyaan 4: Tuyul ijo?",
+        options: ["smiski", "sanrio", "labubu"],
+        answer: ["smiski"],
+        hint: "fav khai"
+      },
+      {
+        question: "Pertanyaan 5: Orang paling baik, ramah dan keren?",
+        options: ["Rasya", "Rsy", "Rasya Rastria Putra"],
+        answer: ["rasya", "rsy", "rasya rastria putra"],
+        hint: "udah jelas"
+      }
+    ];
+
+    let currentQuizIdx = 0;
+    let hintShown = false;
+
+    function initQuiz() {
+      currentQuizIdx = 0;
+    }
+
+    function toggleHint() {
+      const hintEl = document.getElementById('quiz-hint-text');
+      const btnHint = document.getElementById('btn-hint-toggle');
+      hintShown = !hintShown;
+
+      if (hintShown) {
+        hintEl.classList.add('show');
+        btnHint.innerHTML = '<i class="fa-solid fa-eye-slash"></i> Tutup Hint';
+      } else {
+        hintEl.classList.remove('show');
+        btnHint.innerHTML = '<i class="fa-solid fa-lightbulb"></i> Lihat Hint';
+      }
+    }
+
+    function renderQuiz() {
+      const progressEl = document.getElementById('quiz-progress');
+      progressEl.innerHTML = '';
+      for (let i = 0; i < quizData.length; i++) {
+        const bar = document.createElement('div');
+        bar.className = 'quiz-progress-bar' + (i < currentQuizIdx ? ' filled' : '');
+        progressEl.appendChild(bar);
+      }
+
+      const questionEl = document.getElementById('quiz-question');
+      const hintEl = document.getElementById('quiz-hint-text');
+      const btnHint = document.getElementById('btn-hint-toggle');
+      const q = quizData[currentQuizIdx];
+
+      questionEl.innerHTML = `<span>Pertanyaan ${currentQuizIdx + 1} dari ${quizData.length}</span>${q.question}`;
+      hintEl.innerHTML = `<strong>Hint:</strong> ${q.hint}`;
+
+      // Reset hint state
+      hintShown = false;
+      hintEl.classList.remove('show');
+      btnHint.innerHTML = '<i class="fa-solid fa-lightbulb"></i> Lihat Hint';
+
+      const optionsContainer = document.getElementById('quiz-options');
+      optionsContainer.innerHTML = '';
+      q.options.forEach(opt => {
+        const btn = document.createElement('button');
+        btn.className = 'quiz-option-btn';
+        btn.textContent = opt;
+        btn.onclick = () => checkQuizAnswer(opt, btn);
+        optionsContainer.appendChild(btn);
+      });
+    }
+
+    function checkQuizAnswer(selectedOpt, btnEl) {
+      const userAnswer = selectedOpt.trim().toLowerCase();
+      const correctAnswers = quizData[currentQuizIdx].answer.map(a => a.toLowerCase());
+
+      // Disable all buttons to prevent multiple clicks
+      const allBtns = document.querySelectorAll('.quiz-option-btn');
+      allBtns.forEach(b => b.style.pointerEvents = 'none');
+
+      if (correctAnswers.includes(userAnswer)) {
+        btnEl.classList.add('correct-flash');
+        currentQuizIdx++;
+
+        if (currentQuizIdx >= quizData.length) {
+          // All questions answered!
+          showToast('🎉 Semua jawaban benar! Selamat!', 'success');
+          triggerConfetti();
+          setTimeout(() => navigateTo('page3-left'), 2000);
+        } else {
+          setTimeout(renderQuiz, 800);
+        }
+      } else {
+        btnEl.classList.add('shake');
+        setTimeout(() => {
+          btnEl.classList.remove('shake');
+          allBtns.forEach(b => b.style.pointerEvents = 'auto');
+        }, 500);
+        showToast('❌ Jawaban salah, coba lagi!', 'error');
+      }
+    }
+
+    /* ═══════════════════════════════════════════════════════
+       GALLERY (100 Photo Slots with Drag & Drop)
+       ═══════════════════════════════════════════════════════ */
+    const galleryImages = new Array(100).fill(null);
+    let lightboxCurrentIdx = -1;
+
+    function initGallery() {
+      const grid = document.getElementById('gallery-grid');
+      grid.innerHTML = '';
+
+      for (let i = 0; i < 100; i++) {
+        const item = document.createElement('div');
+        item.className = 'gallery-item';
+        item.dataset.idx = i;
+        item.innerHTML = `<span class="placeholder-num">${i + 1}</span>`;
+        item.addEventListener('click', () => {
+          if (galleryImages[i]) {
+            openLightbox(i);
+          }
+        });
+        grid.appendChild(item);
+      }
+
+      // Listen to Firebase Realtime Updates
+      if (db) {
+        db.collection("gallery").orderBy("timestamp", "asc").onSnapshot(snapshot => {
+          galleryImages.fill(null);
+          galleryDocs.fill(null);
+          let i = 0;
+          snapshot.forEach(doc => {
+            if (i < 100) {
+              galleryImages[i] = doc.data().url;
+              galleryDocs[i] = doc;
+              i++;
+            }
+          });
+          for(let idx = 0; idx < 100; idx++) {
+            if (galleryImages[idx]) {
+              updateGallerySlot(idx);
+            } else {
+              const item = grid.children[idx];
+              item.className = 'gallery-item';
+              item.innerHTML = `<span class="placeholder-num">${idx + 1}</span>`;
+            }
+          }
+          updatePhotoCount();
+        }, err => {
+          console.error("Firebase Read Error: (Mungkin aturan Firestore belum diset ke public/true)", err);
+        });
+      }
+
+      // Upload zone event handlers
+      const uploadZone = document.getElementById('upload-zone');
+      const fileInput = document.getElementById('file-input');
+
+      uploadZone.addEventListener('click', () => fileInput.click());
+
+      uploadZone.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        uploadZone.classList.add('drag-over');
+      });
+
+      uploadZone.addEventListener('dragleave', () => {
+        uploadZone.classList.remove('drag-over');
+      });
+
+      uploadZone.addEventListener('drop', (e) => {
+        e.preventDefault();
+        uploadZone.classList.remove('drag-over');
+        handleFiles(e.dataTransfer.files);
+      });
+
+      fileInput.addEventListener('change', (e) => {
+        handleFiles(e.target.files);
+        e.target.value = ''; // Reset for re-upload
+      });
+    }
+
+    function handleFiles(files) {
+      const filesArr = Array.from(files).filter(f => f.type.startsWith('image/') || f.type.startsWith('video/'));
+      
+      if (!db || !storage) {
+        // Fallback local memory
+        let nextSlot = galleryImages.findIndex(img => img === null);
+        filesArr.forEach(file => {
+          if (nextSlot === -1 || nextSlot >= 100) return;
+          const reader = new FileReader();
+          reader.onload = (e) => {
+            galleryImages[nextSlot] = e.target.result;
+            updateGallerySlot(nextSlot);
+            nextSlot = galleryImages.findIndex(img => img === null);
+            updatePhotoCount();
+          };
+          reader.readAsDataURL(file);
+        });
+        return;
+      }
+
+      // Firebase Upload
+      filesArr.forEach(file => {
+        let nextSlot = galleryImages.findIndex(img => img === null);
+        if (nextSlot === -1 || nextSlot >= 100) {
+          showToast('Galeri sudah penuh! (100/100)', 'error');
+          return;
+        }
+        
+        showToast('Mengunggah file ke album bersama...', 'success');
+        const fileName = Date.now() + '_' + file.name;
+        const storageRef = storage.ref('gallery/' + fileName);
+        
+        const uploadTask = storageRef.put(file);
+        uploadTask.on('state_changed', 
+          null, 
+          (error) => showToast('Gagal: ' + error.message, 'error'), 
+          () => {
+            uploadTask.snapshot.ref.getDownloadURL().then((downloadURL) => {
+              db.collection("gallery").add({
+                url: downloadURL,
+                fileName: fileName,
+                type: file.type.startsWith('video/') ? 'video' : 'image',
+                timestamp: firebase.firestore.FieldValue.serverTimestamp()
+              });
+              showToast('Berhasil diunggah ke memori bersama!', 'success');
+            });
+          }
+        );
+      });
+    }
+
+    function updateGallerySlot(idx) {
+      const grid = document.getElementById('gallery-grid');
+      const item = grid.children[idx];
+      item.className = 'gallery-item has-image';
+      const docData = galleryDocs[idx] ? galleryDocs[idx].data() : null;
+      const isVideo = docData ? (docData.type === 'video') : galleryImages[idx].startsWith('data:video');
+      item.innerHTML = `
+        ${isVideo ? `<video src="${galleryImages[idx]}#t=0.1" preload="metadata"></video>` : `<img src="${galleryImages[idx]}" alt="Foto ${idx + 1}" loading="lazy">`}
+        <button class="remove-btn" onclick="event.stopPropagation(); removePhoto(${idx})">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      `;
+    }
+
+    function removePhoto(idx) {
+      if (!db) {
+        galleryImages[idx] = null;
+        const grid = document.getElementById('gallery-grid');
+        const item = grid.children[idx];
+        item.className = 'gallery-item';
+        item.innerHTML = `<span class="placeholder-num">${idx + 1}</span>`;
+        updatePhotoCount();
+        return;
+      }
+      
+      const doc = galleryDocs[idx];
+      if (doc) {
+        if (confirm("Hapus foto/video ini dari album bersama?")) {
+          const docData = doc.data();
+          if (docData.fileName) {
+            storage.ref('gallery/' + docData.fileName).delete().catch(e => console.error(e));
+          }
+          db.collection("gallery").doc(doc.id).delete().then(() => {
+            showToast('Berhasil dihapus', 'success');
+          }).catch(e => showToast('Gagal hapus: ' + e.message, 'error'));
+        }
+      }
+    }
+
+    function updatePhotoCount() {
+      const count = galleryImages.filter(img => img !== null).length;
+      document.getElementById('photo-count-num').textContent = count;
+    }
+
+    /* ── Lightbox ── */
+    function updateLightboxMedia(idx) {
+      const docData = galleryDocs[idx] ? galleryDocs[idx].data() : null;
+      const isVideo = docData ? (docData.type === 'video') : galleryImages[idx].startsWith('data:video');
+      const imgEl = document.getElementById('lightbox-img');
+      const vidEl = document.getElementById('lightbox-vid');
+      if (isVideo) {
+        imgEl.style.display = 'none';
+        vidEl.style.display = 'block';
+        vidEl.src = galleryImages[idx];
+      } else {
+        vidEl.style.display = 'none';
+        vidEl.pause();
+        imgEl.style.display = 'block';
+        imgEl.src = galleryImages[idx];
+      }
+    }
+
+    function openLightbox(idx) {
+      lightboxCurrentIdx = idx;
+      const lb = document.getElementById('lightbox');
+      updateLightboxMedia(idx);
+      lb.classList.add('show');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeLightbox(e) {
+      if (e.target.id === 'lightbox' || e.target.closest('.lightbox-close')) {
+        document.getElementById('lightbox').classList.remove('show');
+        document.body.style.overflow = '';
+        const vidEl = document.getElementById('lightbox-vid');
+        if (vidEl) vidEl.pause();
+      }
+    }
+
+    function lightboxNav(dir) {
+      const filledIndices = galleryImages
+        .map((img, i) => img ? i : -1)
+        .filter(i => i !== -1);
+
+      const curPos = filledIndices.indexOf(lightboxCurrentIdx);
+      let nextPos = curPos + dir;
+      if (nextPos < 0) nextPos = filledIndices.length - 1;
+      if (nextPos >= filledIndices.length) nextPos = 0;
+
+      lightboxCurrentIdx = filledIndices[nextPos];
+      updateLightboxMedia(lightboxCurrentIdx);
+    }
+
+    /* ═══════════════════════════════════════════════════════
+       CUSTOM CALENDAR
+       ═══════════════════════════════════════════════════════ */
+    let calendarDate = new Date();
+    let selectedDate = null;
+
+    const monthNames = [
+      'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
+      'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'
+    ];
+
+    function initCalendar() {
+      renderCalendar();
+      initTimeInputs();
+
+      // Custom place input toggle
+      document.getElementById('input-tempat').addEventListener('change', function () {
+        const customInput = document.getElementById('input-tempat-custom');
+        customInput.style.display = this.value === 'custom' ? 'block' : 'none';
+        if (this.value === 'custom') customInput.focus();
+      });
+    }
+
+    /* ═══════════════════════════════════════════════════════
+       TIME INPUT VALIDATION (0-23 jam, 0-59 menit)
+       ═══════════════════════════════════════════════════════ */
+    function initTimeInputs() {
+      const inputJam = document.getElementById('input-jam');
+      const inputMenit = document.getElementById('input-menit');
+
+      function clampTimeInput(input, min, max) {
+        // Hanya izinkan angka
+        input.addEventListener('input', function () {
+          // Hapus semua karakter non-angka
+          this.value = this.value.replace(/[^0-9]/g, '');
+
+          // Batasi ke 2 digit
+          if (this.value.length > 2) {
+            this.value = this.value.slice(0, 2);
+          }
+
+          // Clamp nilai ke range yang valid
+          if (this.value !== '') {
+            let num = parseInt(this.value, 10);
+            if (num > max) {
+              this.value = String(max).padStart(2, '0');
+            }
+          }
+        });
+
+        // Format saat blur (tambah leading zero)
+        input.addEventListener('blur', function () {
+          if (this.value !== '') {
+            let num = parseInt(this.value, 10);
+            if (isNaN(num) || num < min) num = min;
+            if (num > max) num = max;
+            this.value = String(num).padStart(2, '0');
+          }
+        });
+
+        // Auto-pindah ke menit setelah 2 digit jam
+        if (input === inputJam) {
+          input.addEventListener('input', function () {
+            if (this.value.length === 2) {
+              inputMenit.focus();
+              inputMenit.select();
+            }
+          });
+        }
+      }
+
+      clampTimeInput(inputJam, 0, 23);
+      clampTimeInput(inputMenit, 0, 59);
+    }
+
+    function renderCalendar() {
+      const year = calendarDate.getFullYear();
+      const month = calendarDate.getMonth();
+
+      document.getElementById('calendar-month-label').textContent = `${monthNames[month]} ${year}`;
+
+      const firstDay = new Date(year, month, 1).getDay();
+      const daysInMonth = new Date(year, month + 1, 0).getDate();
+      const daysInPrevMonth = new Date(year, month, 0).getDate();
+
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+
+      const container = document.getElementById('calendar-days');
+      container.innerHTML = '';
+
+      // Previous month fill
+      for (let i = firstDay - 1; i >= 0; i--) {
+        const btn = document.createElement('button');
+        btn.className = 'calendar-day other-month disabled';
+        btn.textContent = daysInPrevMonth - i;
+        container.appendChild(btn);
+      }
+
+      // Current month
+      for (let d = 1; d <= daysInMonth; d++) {
+        const btn = document.createElement('button');
+        btn.className = 'calendar-day';
+
+        const thisDate = new Date(year, month, d);
+        thisDate.setHours(0, 0, 0, 0);
+
+        if (thisDate < today) {
+          btn.classList.add('disabled');
+        }
+
+        if (thisDate.getTime() === today.getTime()) {
+          btn.classList.add('today');
+        }
+
+        if (selectedDate &&
+          selectedDate.getDate() === d &&
+          selectedDate.getMonth() === month &&
+          selectedDate.getFullYear() === year) {
+          btn.classList.add('selected');
+        }
+
+        btn.textContent = d;
+        btn.addEventListener('click', () => selectDate(year, month, d));
+        container.appendChild(btn);
+      }
+
+      // Next month fill
+      const totalCells = firstDay + daysInMonth;
+      const remaining = (7 - (totalCells % 7)) % 7;
+      for (let i = 1; i <= remaining; i++) {
+        const btn = document.createElement('button');
+        btn.className = 'calendar-day other-month disabled';
+        btn.textContent = i;
+        container.appendChild(btn);
+      }
+    }
+
+    function selectDate(year, month, day) {
+      selectedDate = new Date(year, month, day);
+      renderCalendar();
+      document.getElementById('date-display').textContent =
+        `${day} ${monthNames[month]} ${year}`;
+    }
+
+    function calendarPrev() {
+      calendarDate.setMonth(calendarDate.getMonth() - 1);
+      renderCalendar();
+    }
+
+    function calendarNext() {
+      calendarDate.setMonth(calendarDate.getMonth() + 1);
+      renderCalendar();
+    }
+
+    /* ═══════════════════════════════════════════════════════
+       SUBMIT AJAKAN (Telegram / EmailJS Integration)
+       ═══════════════════════════════════════════════════════ */
+    async function submitAjakan() {
+      // Gather form data
+      let tempat = document.getElementById('input-tempat').value;
+      if (tempat === 'custom') {
+        tempat = document.getElementById('input-tempat-custom').value.trim();
+      }
+
+      const jam = document.getElementById('input-jam').value.padStart(2, '0');
+      const menit = document.getElementById('input-menit').value.padStart(2, '0');
+      const waktu = `${jam}:${menit}`;
+
+      if (!tempat || tempat === '' || !jam || !menit || !selectedDate) {
+        showToast('⚠️ Harap lengkapi semua field!', 'error');
+        return;
+      }
+
+      const tanggal = `${selectedDate.getDate()} ${monthNames[selectedDate.getMonth()]} ${selectedDate.getFullYear()}`;
+
+      // Update ticket display
+      document.getElementById('ticket-tempat').textContent = tempat;
+      document.getElementById('ticket-waktu').textContent = waktu + ' WIB';
+      document.getElementById('ticket-tanggal').textContent = tanggal;
+
+      const btn = document.getElementById('btn-submit-ajakan');
+      btn.disabled = true;
+      btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Mengirim...';
+
+      /* ═════════════════════════════════════════════════════
+       * OPSI 1: KIRIM VIA TELEGRAM BOT API
+       * ═════════════════════════════════════════════════════
+       * 
+       * Cara mendapatkan BOT_TOKEN:
+       * 1. Buka Telegram, cari @BotFather
+       * 2. Kirim /newbot, ikuti instruksi
+       * 3. Copy token yang diberikan
+       *
+       * Cara mendapatkan CHAT_ID:
+       * 1. Kirim pesan apapun ke bot Anda
+       * 2. Buka: https://api.telegram.org/bot<BOT_TOKEN>/getUpdates
+       * 3. Cari "chat":{"id": YOUR_CHAT_ID}
+       */
+      const BOT_TOKEN = '8747677510:AAHOpaossKgt66axhw5HLxyf_T3pU0qlCDs';     // <-- Ganti dengan Bot Token Telegram Anda
+      const CHAT_ID = '8285706703';       // <-- Ganti dengan Chat ID Anda
+
+      const message = `🌸 *AJAKAN MAIN BARU!* 🌸\n\n📍 *Tempat:* ${tempat}\n⏰ *Waktu:* ${waktu} WIB\n📅 *Tanggal:* ${tanggal}\n\n💕 _Dari RSY untuk Khai_`;
+
+      try {
+        // ═══ KIRIM VIA TELEGRAM BOT API ═══
+        // Pastikan BOT_TOKEN dan CHAT_ID sudah diisi di atas!
+        if (BOT_TOKEN === 'YOUR_BOT_TOKEN_HERE' || CHAT_ID === 'YOUR_CHAT_ID_HERE') {
+          console.warn('⚠️ BOT_TOKEN atau CHAT_ID belum diisi! Notifikasi tidak terkirim.');
+          showToast('⚠️ Token Telegram belum diisi! Tiket tetap dibuat.', 'error');
+        } else {
+          const telegramRes = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              chat_id: CHAT_ID,
+              text: message,
+              parse_mode: 'Markdown'
+            })
+          });
+
+          if (!telegramRes.ok) {
+            const errData = await telegramRes.json().catch(() => ({}));
+            console.error('Telegram error:', errData);
+            throw new Error('Telegram API error: ' + (errData.description || telegramRes.status));
+          }
+
+          console.log('✅ Notifikasi Telegram berhasil terkirim!');
+        }
+
+        /* ═════════════════════════════════════════════════════
+         * OPSI ALTERNATIF: KIRIM VIA EMAILJS
+         * ═════════════════════════════════════════════════════
+         * 
+         * 1. Daftar di https://www.emailjs.com/
+         * 2. Buat Email Service & Email Template
+         * 3. Dapatkan Service ID, Template ID, dan Public Key
+         * 
+         * Tambahkan script di <head>:
+         * <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js">
+         *
+         * Lalu uncomment kode di bawah ini:
+         */
+        /*
+        const EMAILJS_SERVICE_ID  = 'YOUR_SERVICE_ID';   // <-- Ganti
+        const EMAILJS_TEMPLATE_ID = 'YOUR_TEMPLATE_ID';  // <-- Ganti
+        const EMAILJS_PUBLIC_KEY  = 'YOUR_PUBLIC_KEY';    // <-- Ganti
+
+        emailjs.init(EMAILJS_PUBLIC_KEY);
+        await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, {
+          tempat: tempat,
+          waktu: waktu + ' WIB',
+          tanggal: tanggal
+        });
+        */
+
+        showToast('✅ Ajakan terkirim!', 'success');
+        triggerConfetti();
+        setTimeout(() => navigateTo('page3-right'), 1500);
+
+      } catch (err) {
+        console.error('Send error:', err);
+        showToast('⚠️ Gagal mengirim, tapi tiketmu tetap tersedia!', 'error');
+        // Tetap lanjut ke tiket walaupun gagal kirim
+        setTimeout(() => navigateTo('page3-right'), 1500);
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> Kirim Ajakan';
+      }
+    }
+
+    /* ═══════════════════════════════════════════════════════
+       TICKET — SAVE AS IMAGE
+       ═══════════════════════════════════════════════════════ */
+    function saveTicket() {
+      const ticketEl = document.getElementById('ticket-card');
+      showToast('📸 Menyimpan tiket...', 'success');
+
+      html2canvas(ticketEl, {
+        backgroundColor: '#FFFFFF',
+        scale: 2,
+        useCORS: true,
+        logging: false
+      }).then(canvas => {
+        const link = document.createElement('a');
+        link.download = 'tiket-kencan-rsy-khai.png';
+        link.href = canvas.toDataURL('image/png');
+        link.click();
+        showToast('✅ Tiket tersimpan!', 'success');
+      }).catch(() => {
+        showToast('📱 Screenshot halaman ini untuk menyimpan tiket!', 'error');
+      });
+    }
+
+    /* ═══════════════════════════════════════════════════════
+       BARCODE GENERATOR (Decorative)
+       ═══════════════════════════════════════════════════════ */
+    function generateBarcode() {
+      const container = document.getElementById('ticket-barcode');
+      container.innerHTML = '';
+      const widths = [2, 1, 3, 1, 2, 3, 1, 1, 2, 3, 1, 2, 1, 3, 2, 1, 1, 3, 2, 1, 2, 1, 3, 1, 2, 1, 3, 2, 1, 1];
+      widths.forEach(w => {
+        const bar = document.createElement('span');
+        bar.style.width = w + 'px';
+        container.appendChild(bar);
+      });
+    }
+
+    /* ═══════════════════════════════════════════════════════
+       CONFETTI EFFECT
+       ═══════════════════════════════════════════════════════ */
+    function triggerConfetti() {
+      const container = document.getElementById('confetti-container');
+      container.innerHTML = '';
+      const colors = ['#FF8DA1', '#FFB3C1', '#FFD6DE', '#6BCB77', '#FFD93D', '#FF6B6B', '#C084FC', '#67E8F9'];
+
+      for (let i = 0; i < 60; i++) {
+        const piece = document.createElement('div');
+        piece.className = 'confetti-piece';
+        piece.style.left = Math.random() * 100 + '%';
+        piece.style.background = colors[Math.floor(Math.random() * colors.length)];
+        piece.style.width = (6 + Math.random() * 8) + 'px';
+        piece.style.height = (6 + Math.random() * 8) + 'px';
+        piece.style.borderRadius = Math.random() > 0.5 ? '50%' : '2px';
+        piece.style.animationDuration = (1.5 + Math.random() * 2) + 's';
+        piece.style.animationDelay = (Math.random() * 0.8) + 's';
+        container.appendChild(piece);
+      }
+
+      // Clean up after animation
+      setTimeout(() => {
+        container.innerHTML = '';
+      }, 4000);
+    }
+
+    /* ═══════════════════════════════════════════════════════
+       TOAST NOTIFICATIONS
+       ═══════════════════════════════════════════════════════ */
+    let toastTimeout;
+    function showToast(message, type = '') {
+      const toast = document.getElementById('toast');
+      toast.textContent = message;
+      toast.className = 'toast' + (type ? ' ' + type : '');
+
+      clearTimeout(toastTimeout);
+
+      requestAnimationFrame(() => {
+        toast.classList.add('show');
+      });
+
+      toastTimeout = setTimeout(() => {
+        toast.classList.remove('show');
+      }, 3000);
+    }
+  </script>
+</body>
+
+</html>
